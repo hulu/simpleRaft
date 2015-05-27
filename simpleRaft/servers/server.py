@@ -124,7 +124,7 @@ class ZeroMQClient(object):
             poller.register(socket, zmq.POLLIN)
         start = time.time()
         while time.time() < start + self._timeout:
-            socks = dict(poller.poll())
+            socks = dict(poller.poll(timeout=self._timeout))
             for sock in sockets:
                 if sock in socks and socks[sock] == zmq.POLLIN:
                     message = sock.recv()
@@ -133,7 +133,7 @@ class ZeroMQClient(object):
                         votes[message.leader] += 1
                     else:
                         votes[message.leader] = 1
-                    if votes[message.leader] > self.quorum:
+                    if votes[message.leader] >= self.quorum:
                         # break if we have enough votes
                         return message.leader 
         print votes
