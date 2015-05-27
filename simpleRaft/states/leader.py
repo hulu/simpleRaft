@@ -21,7 +21,14 @@ class Leader(Voter):
 
     def on_append_entries(self, message):
         if message.sender == self._server._name:
+            # bcast
             return self, None
+        if message.term > self._server._currentTerm:
+            ## If we're getting append messages from the future, we're not the leader
+            from .follower import Follower
+            follower = Follower()
+            follower.set_server(self._server)
+            return follower, None
         raise RuntimeError
 
     def on_vote_received(self, message):
